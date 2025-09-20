@@ -8,7 +8,7 @@
 
 
 ### Overview
-This approach leverages the existing Technical Debt Dataset from 33 Apache Software Foundation Java projects. The dataset contains over 1 million commit samples with basic metadata (commit_sha, date, file, lines_added, lines_removed, notes). We enhance this data by extracting additional features and attempting to label build outcomes via GitHub API.
+This approach leverages the existing [Technical Debt Dataset](https://github.com/clowee/The-Technical-Debt-Dataset) from 33 Apache Software Foundation Java projects. The dataset contains over 1 million commit samples with basic metadata (commit_sha, date, file, lines_added, lines_removed, notes). Enhance this data by extracting additional features and attempting to label build outcomes via GitHub API.
 
 ### Data Source
 - **Origin**: Technical Debt Dataset (Apache Software Foundation)
@@ -267,5 +267,6 @@ e45ddd17242da2dc479e69f613563f68efa66170,68,7,2,0,1,0
   - Multi-repository data collection
   - Cross-language project analysis
   - Enterprise repository integration
+
 
 
