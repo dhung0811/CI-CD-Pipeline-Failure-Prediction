@@ -99,8 +99,6 @@ remote_additions, remote_deletions, remote_has_ci, remote_has_pr, gha_workflow_n
 
 ## Approach 2: Fresh Public Repository Mining
 
-**Best suited for**: Research projects requiring clean build labels, modern CI/CD analysis
-
 ### Overview
 This approach collects fresh data directly from public GitHub repositories with active GitHub Actions workflows. It first extracts build outcome data (id, sha, conclusion) from GitHub Actions, then uses PyDriller to mine detailed commit metadata, ensuring accurate build-commit correlation.
 
@@ -269,4 +267,5 @@ e45ddd17242da2dc479e69f613563f68efa66170,68,7,2,0,1,0
   - Multi-repository data collection
   - Cross-language project analysis
   - Enterprise repository integration
+
 
