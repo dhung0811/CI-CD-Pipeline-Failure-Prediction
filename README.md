@@ -73,7 +73,7 @@ python Approach1/label.py --token $GITHUB_TOKEN
 python data.py
 ```
 
-### Pros ✅
+### Pros
 - **Massive Scale**: Access to >1 million commit samples
 - **Established Projects**: Data from mature Apache Software Foundation projects
 - **Historical Depth**: Long-term project evolution data
@@ -82,7 +82,7 @@ python data.py
 - **No Repository Cloning**: Works with existing CSV data
 - **Fast Processing**: Efficient handling of large datasets
 
-### Cons ❌
+### Cons
 - **Labeling Challenges**: Many GitHub Actions return 'pending' or 'not_processed'
 - **Missing Build Data**: Historical commits often lack corresponding CI/CD runs
 - **Old Projects**: Some Apache projects may have outdated CI/CD practices
@@ -145,29 +145,8 @@ Labeled Dataset (pr_dataset.csv)
 - Developer activity patterns
 - Code complexity metrics
 
-### Usage Example
-```bash
-# Step 1: Collect GitHub Actions build data
-python Approach2/github_actions_pull.py \
-  --owner facebook \
-  --repo react \
-  --token $GITHUB_TOKEN \
-  --out gha_runs.json
 
-# Step 2: Mine repository data with build correlation
-python Approach2/mine.py \
-  --gha_json gha_runs.json \
-  --local_repo /path/to/react \
-  --out_csv pr_dataset.csv
-
-# Alternative: Remote repository mining
-python Approach2/mine.py \
-  --gha_json gha_runs.json \
-  --repo_url https://github.com/facebook/react \
-  --out_csv pr_dataset.csv
-```
-
-### Pros ✅
+### Pros
 - **Clean Build Labels**: Direct correlation between commits and build outcomes
 - **Modern CI/CD**: Works with current GitHub Actions workflows
 - **High Data Quality**: Accurate build-commit relationships
@@ -176,7 +155,7 @@ python Approach2/mine.py \
 - **Real-time Data**: Fresh data from active development
 - **Precise Measurements**: Exact line counts and file modifications
 
-### Cons ❌
+### Cons
 - **Limited Scale**: Smaller datasets compared to historical approaches
 - **Public Repository Constraint**: Limited to publicly accessible repositories
 - **Processing Intensive**: Slower due to full repository analysis
@@ -229,35 +208,8 @@ python Approach2/mine.py \
   - Cross-language project analysis
   - Enterprise repository integration
 
-## Choosing the Right Approach
 
-### Use Approach 1 when:
-- You need large-scale datasets for statistical analysis
-- You're studying long-term software evolution patterns
-- You have computational resources for processing large datasets
-- Build outcome accuracy is less critical than sample size
 
-### Use Approach 2 when:
-- You need accurate build outcome labels for ML model training
-- You're focusing on modern CI/CD practices
-- You can work with smaller, high-quality datasets
-- You need detailed git analysis features
-
-## Dependencies
-
-```
-pandas>=1.3.0      # Data manipulation and CSV processing
-requests>=2.25.0   # GitHub API communication
-chardet>=4.0.0     # Character encoding detection for CSV files
-pydriller>=2.0     # Git repository mining (Approach 2 only)
-```
-
-## Getting Started
-
-1. **For large-scale analysis**: Start with Approach 1 and the Technical Debt Dataset
-2. **For ML model training**: Use Approach 2 for clean, labeled data
-3. **For research comparison**: Implement both approaches on overlapping repositories
-4. **For production systems**: Consider hybrid approaches combining both methods
 
 
 
