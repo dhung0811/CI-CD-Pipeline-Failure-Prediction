@@ -1,28 +1,11 @@
 
 # Build Failure Prediction Dataset Creation
 
-This project implements two distinct approaches for creating machine learning datasets from git commit data to predict build outcomes. Based on research with Apache Software Foundation projects and public GitHub repositories, each approach addresses specific data collection challenges and research requirements.
 
-## Project Background
-
-The goal is to create labeled datasets where each commit is associated with features (code changes, commit metadata) and a target variable (build success/failure). This enables training ML models to predict whether a commit will cause build failures in CI/CD pipelines.
-
-## Installation
-
-```bash
-pip install -r requirements.txt
-```
-
-Set up your GitHub Personal Access Token:
-```bash
-export GITHUB_TOKEN="your_github_token_here"
-```
-
----
 
 ## Approach 1: Technical Debt Dataset Enhancement
 
-**Best suited for**: Large-scale historical analysis, existing commit datasets from established projects
+
 
 ### Overview
 This approach leverages the existing Technical Debt Dataset from 33 Apache Software Foundation Java projects. The dataset contains over 1 million commit samples with basic metadata (commit_sha, date, file, lines_added, lines_removed, notes). We enhance this data by extracting additional features and attempting to label build outcomes via GitHub API.
@@ -34,9 +17,15 @@ This approach leverages the existing Technical Debt Dataset from 33 Apache Softw
 - **Initial Features**: commit_sha, date, file, lines_added, lines_removed, notes
 
 ### Data Pipeline
+git_commit.csv![git_commit](access/git_commit_changes.png
+)
+↓
+enhanced_git_commit.csv![enhanced_git_commit](access/enhanced_git_commit_changes.png)
+↓
+labeled_git_commit.csv![labeld_git_commit](access/labeled_git_commit_changes.png)
 ```
 Technical Debt Dataset (gitcommitchanges.csv)
-    ↓ CSV Structure Fixing & Feature Extraction
+     CSV Structure Fixing & Feature Extraction
 Enhanced Dataset (enhanced_gitcommitchanges.csv)
     ↓ GitHub API Build Labeling
 Labeled Dataset (labeled_git_commit_changes.csv)
@@ -49,10 +38,30 @@ Labeled Dataset (labeled_git_commit_changes.csv)
 | **Build Labeler** | `label.py` | Attempts build outcome labeling via GitHub API |
 | **Data Inspector** | `data.py` | Dataset analysis and validation |
 
+### Dataset Structure
+
+**Input CSV Structure** (Technical Debt Dataset):
+```
+PROJECT_ID, FILE, COMMIT_HASH, DATE, COMMITTER_ID, LINES_ADDED, LINES_REMOVED, NOTE
+```
+
+**Enhanced CSV Structure** (after get_metadata_from_commit.py):
+```
+PROJECT_ID, FILE, COMMIT_HASH, DATE, COMMITTER_ID, LINES_ADDED, LINES_REMOVED, NOTE,
+has_fix_keyword, files_changed, changed_tests
+```
+
+**Final Labeled CSV Structure** (after label.py):
+```
+PROJECT_ID, FILE, COMMIT_HASH, DATE, COMMITTER_ID, LINES_ADDED, LINES_REMOVED, NOTE,
+has_fix_keyword, files_changed, changed_tests, build_label, remote_files_changed,
+remote_additions, remote_deletions, remote_has_ci, remote_has_pr, gha_workflow_names
+```
+
 ### Features Extracted
 **Basic Commit Features**:
 - `files_changed` - Number of files modified per commit
-- `has_fix_keyword` - Presence of fix-related keywords in commit messages
+- `has_fix_keyword` - Presence of fix-related keywords in commit messages  
 - `changed_tests` - Boolean indicating test file modifications
 - `lines_added/removed` - Code change volume metrics
 
@@ -126,6 +135,24 @@ Labeled Dataset (pr_dataset.csv)
 | **Build Collector** | `github_actions_pull.py` | Extracts GitHub Actions workflow results |
 | **Repository Miner** | `mine.py` | Mines commit data using PyDriller with build correlation |
 
+### Dataset Structure
+
+**GitHub Actions JSON Structure** (gha_runs.json):
+```json
+{
+  "id": "workflow_run_id",
+  "head_sha": "commit_hash", 
+  "conclusion": "success|failure|cancelled|skipped",
+  "event": "push|pull_request",
+  "workflow_name": "CI workflow name"
+}
+```
+
+**Final CSV Structure** (pr_dataset.csv):
+```
+commit_hash, lines_added, lines_deleted, files_changed, has_fix_keyword, changed_tests, pipeline_failed
+```
+
 ### Features Extracted
 **Build Outcome Labels**:
 - `pipeline_failed` - Binary target variable (0=success, 1=failure)
@@ -135,9 +162,8 @@ Labeled Dataset (pr_dataset.csv)
 - `lines_added/deleted` - Precise line counts from git diffs
 - `changed_tests` - Count of modified test files
 - `files_changed` - Number of files modified
-- `has_fix_keyword` - Fix-related keyword detection
+- `has_fix_keyword` - Fix-related keyword detection (0/1)
 - `commit_hash` - Unique commit identifier
-- `author_date` - Commit timestamp
 
 **Advanced Features** (via PyDriller):
 - File-level change analysis
@@ -184,6 +210,52 @@ Labeled Dataset (pr_dataset.csv)
 | **Research Value** | Large-scale analysis | Precise prediction models |
 | **Reproducibility** | High | Medium |
 
+## Data Schema Reference
+
+### Column Descriptions
+
+**Common Columns (Both Approaches)**:
+| Column | Type | Description | Example |
+|--------|------|-------------|---------|
+| `commit_hash` | string | SHA-1 commit identifier | `e45ddd17242da2dc479e69f613563f68efa66170` |
+| `lines_added` | integer | Number of lines added in commit | `68` |
+| `lines_deleted` | integer | Number of lines removed in commit | `7` |
+| `files_changed` | integer | Number of files modified | `3` |
+| `has_fix_keyword` | boolean/integer | Contains fix-related keywords (fix, bug) | `1` (True) or `0` (False) |
+| `changed_tests` | boolean/integer | Test files were modified | `1` (True) or `0` (False) |
+
+**Approach 1 Specific Columns**:
+| Column | Type | Description | Example |
+|--------|------|-------------|---------|
+| `PROJECT_ID` | string | Apache project identifier | `org.apache:maven` |
+| `FILE` | string | Modified file path | `src/main/java/Main.java` |
+| `DATE` | datetime | Commit timestamp | `2023-01-15 14:30:00+00:00` |
+| `COMMITTER_ID` | string | Committer identifier | `john.doe` |
+| `NOTE` | string | Commit message | `fix: resolve null pointer exception` |
+| `build_label` | string | Build outcome | `passed`, `failed`, `no_ci`, `unknown` |
+| `remote_has_ci` | boolean | Has CI/CD pipeline | `True`/`False` |
+| `remote_has_pr` | boolean | Part of pull request | `True`/`False` |
+
+**Approach 2 Specific Columns**:
+| Column | Type | Description | Example |
+|--------|------|-------------|---------|
+| `pipeline_failed` | integer | Binary build outcome | `0` (success) or `1` (failure) |
+
+### Sample Data
+
+**Approach 1 Sample** (labeled_git_commit_changes.csv):
+```csv
+PROJECT_ID,FILE,COMMIT_HASH,DATE,COMMITTER_ID,LINES_ADDED,LINES_REMOVED,NOTE,has_fix_keyword,files_changed,changed_tests,build_label,remote_has_ci,remote_has_pr
+org.apache:maven,pom.xml,abc123...,2023-01-15 14:30:00,john.doe,5,2,"fix: update dependency",1,2,0,passed,1,1
+```
+
+**Approach 2 Sample** (pr_dataset.csv):
+```csv
+commit_hash,lines_added,lines_deleted,files_changed,has_fix_keyword,changed_tests,pipeline_failed
+e45ddd17242da2dc479e69f613563f68efa66170,68,7,2,0,1,0
+24409692b6400116f732a13dd18541df56c46121,17,2,1,0,0,0
+```
+
 ## Research Challenges & Solutions
 
 ### Current Challenges
@@ -191,22 +263,8 @@ Labeled Dataset (pr_dataset.csv)
 2. **Approach 2 Scale Limitations**: Limited to public repositories with active CI/CD
 3. **Feature Engineering**: Need for dependency and environment-related features
 
-### Future Development Directions
-- **Enhanced Feature Collection**: 
-  - Dependency change analysis
-  - Environment configuration tracking
-  - Code complexity metrics
-  - Developer experience indicators
 
-- **Improved Labeling Strategies**:
-  - Alternative build outcome sources
-  - Hybrid labeling approaches
-  - Manual validation for critical samples
 
-- **Scale Expansion**:
-  - Multi-repository data collection
-  - Cross-language project analysis
-  - Enterprise repository integration
 
 
 
