@@ -1,0 +1,12 @@
+Dataset:
+Hiện em đang có 2 hướng tiếp cận: 
+1.	Từ The Technical Debt Dataset:
+-	Đây là dataset được lấy từ 33 project Java của Apache Software Foundation. Dataset này bao gồm các commit_sha, date, file, line_added, line_removed, note,…
+-	Từ dataset này em đã sử dụng commit_sha của các commit  để lấy thêm các feature như ‘files_changed’, ‘has_fixed_keyword’, ‘changed_test’,..dùng để label, nhưng không hiệu quả, vì các conclusion từ Github Actions đều trả về ‘pending’ hoặc ‘not_proccessed’ hoặc không tìm thấy build tương ứng.
+	Nhiều sample (>1mil samples), nhưng chưa được label rõ ràng
+2.	Tự lấy data từ các public repos:
+-	Em lấy data từ các Github Action builds trong đó có các field như id, sha, conclusion,…. (các file này sẽ được lưu dưới dạng file json). Và từ sha này  em sử dụng Pydriller để lấy thêm các metadata khác của commit bao gồm các feature như line_added, line_removed, ‘files_changed’, ‘has_fixed_keyword’, ‘changed_test’,… và cũng label dựa trên conclusion của Github Action build.
+	Data chưa nhiều, chỉ thực hiện với các public repos.
+Hướng phát triển: 
+-	Tìm cách thu thập thêm các feature liên quan đến các dependencies, environment,…
+-	Thực hiện label cho data đã thu thập được.
