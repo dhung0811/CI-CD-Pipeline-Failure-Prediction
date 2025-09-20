@@ -140,7 +140,7 @@ Labeled Dataset (pr_dataset.csv)
 ```
 commit_hash, lines_added, lines_deleted, files_changed, has_fix_keyword, changed_tests, pipeline_failed
 ```
-
+![pr_dataset](access/pr_data.png)
 ### Features Extracted
 **Build Outcome Labels**:
 - `pipeline_failed` - Binary target variable (0=success, 1=failure)
